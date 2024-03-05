@@ -127,7 +127,6 @@ jobs:
     
       - name: Configure httpd
         run: |
-          set -x
           # Setup httpd mod_ssl to use token keys.
           TOKENURL=$(runuser -u apache -- p11tool --list-tokens \
             | grep "URL:.*token=softtoken" \
@@ -153,6 +152,7 @@ jobs:
 
       - name: Test httpd
         run: |
+          set -x
           # Enable pkcs11-provider logging.
           export PKCS11_PROVIDER_DEBUG=file:$P_HTTPD_DEBUG
 
