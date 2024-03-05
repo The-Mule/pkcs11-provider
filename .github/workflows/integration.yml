@@ -157,9 +157,11 @@ jobs:
           export PKCS11_PROVIDER_DEBUG=file:$P_HTTPD_DEBUG
 
           # Start the server.
+          httpd -v
           httpd -DFOREGROUND &
           http_pid=$!
           sleep 3 
+          dmesg
           kill -0 $http_pid
           if [ $? -ne 0 ]; then
             cat /var/log/httpd/error_log
