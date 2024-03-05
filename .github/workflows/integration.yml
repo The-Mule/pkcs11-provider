@@ -153,7 +153,7 @@ jobs:
           echo "CERTURL=$CERTURL"
           cat /etc/httpd/conf.d/ssl.conf
           
-          OPENSSL_CONF=/tmp/openssl.cnf openssl pkey -in "$TOKENURL" -pubin -pubout -text
+          OPENSSL_CONF=/tmp/openssl.cnf openssl pkey -in "$KEYURL" -pubin -pubout -text
       - name: Test httpd
         run: |
           set -x
