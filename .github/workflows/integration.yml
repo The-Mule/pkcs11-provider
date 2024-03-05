@@ -73,6 +73,7 @@ jobs:
           gnutls-utils p11-kit p11-kit-devel p11-kit-server opensc \
           softhsm-devel socket_wrapper nss_wrapper uid_wrapper \
           pam_wrapper priv_wrapper openssh-server zlib-devel
+          dnf -y update --releasever=40 openssl
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: Setup, Build and Install pkcs11-provider
@@ -163,10 +164,8 @@ jobs:
 
           # Start the server.
           echo "123456" >/tmp/pin.txt
-          export OPENSSL_CONF=/tmp/openssl.cnf
-          httpd -DFOREGROUND &
-          #rpm -q httpd
-          sleep 3
+          OPENSSL_CONF=/tmp/openssl.cnf httpd -DFOREGROUND &
+          sleep 10
           if ! pgrep httpd >/dev/null; then
             cat /var/log/httpd/error_log
             cat /var/log/httpd/ssl_error_log
