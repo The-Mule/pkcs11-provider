@@ -162,7 +162,7 @@ jobs:
           OPENSSL_CONF=/tmp/openssl.cnf httpd -DFOREGROUNG &
           rpm -q httpd
           sleep 3 
-          if pgrep httpd >/dev/null; then
+          if ! pgrep httpd >/dev/null; then
             cat /var/log/httpd/error_log
             cat /var/log/httpd/ssl_error_log
             cat $P_HTTPD_DEBUG
