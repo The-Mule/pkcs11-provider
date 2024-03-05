@@ -67,13 +67,12 @@ jobs:
     steps:
       - name: Install Dependencies
         run: |
-          dnf -y install p11-kit httpd mod_ssl openssl softhsm \
+          dnf -y install --releasever=40 p11-kit httpd mod_ssl openssl softhsm \
           gnutls-utils gcc g++ git cmake libcmocka libcmocka-devel \
           autoconf automake autoconf-archive libtool softhsm nss-tools \
           gnutls-utils p11-kit p11-kit-devel p11-kit-server opensc \
           softhsm-devel socket_wrapper nss_wrapper uid_wrapper \
           pam_wrapper priv_wrapper openssh-server zlib-devel
-          dnf update -y --releasever=40 httpd
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: Setup, Build and Install pkcs11-provider
@@ -114,18 +113,18 @@ jobs:
       - name: Configure openssl
         run: |
           # Add and activate pkcs11 provider section in openssl configuration.
-          sed -i \
+          sed \
             -e 's|\(default = default_sect\)|\1\npkcs11 = pkcs11_sect\n|' \
             -e 's|\(\[default_sect\]\)|\[pkcs11_sect\]\n\1|' \
             -e 's|\(\[default_sect\]\)|module = /usr/lib64/ossl-modules/pkcs11.so\n\1|' \
             -e 's|\(\[default_sect\]\)|pkcs11-module-path = /usr/lib64/pkcs11/libsofthsm2.so\n\1|' \
-            -e 's|\(\[default_sect\]\)|pkcs11-module-token-pin = file:/tmp/pin.txt\n\1|' \
+            -e 's|\(\[default_sect\]\)|#pkcs11-module-token-pin = file:/tmp/pin.txt\n\1|' \
             -e 's|\(\[default_sect\]\)|#pkcs11-module-load-behavior = early\n\1|' \
             -e 's|\(\[default_sect\]\)|activate = 1\n\n\1|' \
-            /etc/pki/tls/openssl.cnf #>/tmp/openssl.cnf
+            /etc/pki/tls/openssl.cnf >/tmp/openssl.cnf
 
           # Print openssl.cnf (for debugging).
-          #cat /tmp/openssl.cnf
+          cat /tmp/openssl.cnf
     
       - name: Configure httpd
         run: |
@@ -154,7 +153,7 @@ jobs:
           echo "CERTURL=$CERTURL"
           cat /etc/httpd/conf.d/ssl.conf
           
-          openssl pkey -in "$KEYURL" -pubin -pubout -text
+          OPENSSL_CONF=/tmp/openssl.cnf openssl pkey -in "$KEYURL" -pubin -pubout -text
 
       - name: Test httpd
         run: |
