@@ -63,7 +63,7 @@ jobs:
   httpd:
     name: httpd
     runs-on: ubuntu-22.04
-    container: fedora-40
+    container: docker.io/dokken/fedora-40
     steps:
       - name: Install Dependencies
         run: |
