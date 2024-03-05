@@ -138,6 +138,7 @@ jobs:
           CERTURL=$(runuser -u apache -- p11tool --list-all-certs $TOKENURL \
             | grep "URL:.*object=httpd;type=cert" \
             | awk '{ print $NF }')
+          sed -i "s/^ServerName.*\$/ServerName 127.0.0.01/" /etc/httpd/conf/httpd.conf
           sed -i \
             -e "/SSLCryptoDevice/d" \
             -e "s/^SSLCertificateFile.*\$/SSLCertificateFile \"$CERTURL\"/" \
@@ -158,10 +159,9 @@ jobs:
 
           # Start the server.
           httpd -v
-          httpd -DFOREGROUND &
+          httpd &
           http_pid=$!
           sleep 3 
-          dmesg
           kill -0 $http_pid
           if [ $? -ne 0 ]; then
             cat /var/log/httpd/error_log
