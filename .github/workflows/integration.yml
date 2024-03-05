@@ -8,29 +8,37 @@ on:
     branches: ["main"]
 
 env:
-    P_LIBSSH_DEBUG: /tmp/libssh-provider-debug.log
+  P_LIBSSH_DEBUG: /tmp/libssh-provider-debug.log
+  P_HTTPD_DEBUG: /tmp/httpd-provider-debug.log
+  PIN: 123456
 
 jobs:
-  build:
+  libssh:
     name: libssh
     runs-on: ubuntu-22.04
-    container: fedora:latest
+    container: docker.io/dokken/fedora-40
     steps:
-      - name: Install Dependencies
-        run: |
-          dnf -y install gcc g++ git cmake libcmocka libcmocka-devel \
-          autoconf automake autoconf-archive libtool softhsm nss-tools \
-          gnutls-utils p11-kit p11-kit-devel p11-kit-server opensc \
-          softhsm-devel socket_wrapper nss_wrapper uid_wrapper \
-          pam_wrapper priv_wrapper openssh-server zlib-devel
       - name: Checkout Repository
         uses: actions/checkout@v3
+
+      - name: Install Build Requirements
+        run: |
+          dnf -y install git autoconf autoconf-archive automake libtool \
+            openssl-devel
+
       - name: Setup, Build and Install pkcs11-provider
         run: |
           autoreconf -fiv
           ./configure --libdir=/usr/lib64
           make
           make install
+
+      - name: Install Test Requirements
+        run: |
+          dnf -y install softhsm p11-kit p11-kit-devel p11-kit-server opensc \
+            softhsm-devel socket_wrapper nss_wrapper uid_wrapper pam_wrapper \
+            priv_wrapper openssh-server zlib-devel
+
       - name: Clone, Setup and Build libssh
         run: |
           git clone https://gitlab.com/libssh/libssh-mirror.git
@@ -45,6 +53,7 @@ jobs:
             -DWITH_PKCS11_PROVIDER=ON \
             -DPKCS11_PROVIDER=/usr/lib64/ossl-modules/pkcs11.so ..
           make
+
       - name: Run libssh pkcs11-provider tests
         run: |
           cd libssh-mirror/build
@@ -57,3 +66,55 @@ jobs:
           grep -q "100% tests passed, 0 tests failed out of 3" testout.log
           test -e $P_LIBSSH_DEBUG && \
             echo "Provider log $P_LIBSSH_DEBUG exists (expected)"
+
+  httpd:
+    runs-on: ubuntu-22.04
+    # TODO: Change to fedora:latest once F40 is released
+    container: docker.io/dokken/fedora-40
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Build Requirements
+        run: |
+          dnf -y install autoconf autoconf-archive automake libtool \
+            openssl-devel
+
+      - name: Setup, Build and Install pkcs11-provider
+        run: |
+          autoreconf -fiv
+          ./configure --libdir=/usr/lib64
+          make
+          make install
+
+      - name: Test
+        run: |
+          export PKCS11_MODULE=/usr/lib64/ossl-modules/pkcs11.so
+          pushd tests/integration
+          bash -e httpd.sh
+
+  bind:
+    runs-on: ubuntu-22.04
+    # TODO: Change to fedora:latest once F40 is released
+    container: docker.io/dokken/fedora-40
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Build Requirements
+        run: |
+          dnf -y install autoconf autoconf-archive automake libtool \
+            openssl-devel
+
+      - name: Setup, Build and Install pkcs11-provider
+        run: |
+          autoreconf -fiv
+          ./configure --libdir=/usr/lib64
+          make
+          make install
+
+      - name: Test
+        run: |
+          export PKCS11_MODULE=/usr/lib64/ossl-modules/pkcs11.so
+          pushd tests/integration
+          bash -e bind.sh
