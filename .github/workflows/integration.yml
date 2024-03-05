@@ -118,8 +118,8 @@ jobs:
             -e 's|\(\[default_sect\]\)|\[pkcs11_sect\]\n\1|' \
             -e 's|\(\[default_sect\]\)|module = /usr/lib64/ossl-modules/pkcs11.so\n\1|' \
             -e 's|\(\[default_sect\]\)|pkcs11-module-path = /usr/lib64/pkcs11/libsofthsm2.so\n\1|' \
-            -e 's|\(\[default_sect\]\)|#pkcs11-module-token-pin = file:/tmp/pin.txt\n\1|' \
-            -e 's|\(\[default_sect\]\)|#pkcs11-module-load-behavior = early\n\1|' \
+            -e 's|\(\[default_sect\]\)|pkcs11-module-token-pin = file:/tmp/pin.txt\n\1|' \
+            -e 's|\(\[default_sect\]\)|pkcs11-module-load-behavior = early\n\1|' \
             -e 's|\(\[default_sect\]\)|activate = 1\n\n\1|' \
             /etc/pki/tls/openssl.cnf >/tmp/openssl.cnf
 
@@ -153,7 +153,7 @@ jobs:
           echo "CERTURL=$CERTURL"
           cat /etc/httpd/conf.d/ssl.conf
 
-          OPENSSL_CONF=/tmp/openssl.cnf openssl pkey -in "$KEYURL" -pubin -pubout -text
+          #OPENSSL_CONF=/tmp/openssl.cnf openssl pkey -in "$KEYURL" -pubin -pubout -text
 
       - name: Test httpd
         run: |
@@ -163,8 +163,9 @@ jobs:
 
           # Start the server.
           echo "123456" >/tmp/pin.txt
-          OPENSSL_CONF=/tmp/openssl.cnf httpd -DFOREGROUND &
-          rpm -q httpd
+          export OPENSSL_CONF=/tmp/openssl.cnf
+          httpd -DFOREGROUND &
+          #rpm -q httpd
           sleep 3
           if ! pgrep httpd >/dev/null; then
             cat /var/log/httpd/error_log
