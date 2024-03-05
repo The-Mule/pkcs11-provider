@@ -63,7 +63,7 @@ jobs:
   httpd:
     name: httpd
     runs-on: ubuntu-22.04
-    container: quay.io/generic/fedora-rawhide
+    container: fedora-40
     steps:
       - name: Install Dependencies
         run: |
@@ -72,7 +72,8 @@ jobs:
           autoconf automake autoconf-archive libtool softhsm nss-tools \
           gnutls-utils p11-kit p11-kit-devel p11-kit-server opensc \
           softhsm-devel socket_wrapper nss_wrapper uid_wrapper \
-          pam_wrapper priv_wrapper openssh-server zlib-devel kernel-devel
+          pam_wrapper priv_wrapper openssh-server zlib-devel
+          dnf update -y --releasever=40 httpd
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: Setup, Build and Install pkcs11-provider
