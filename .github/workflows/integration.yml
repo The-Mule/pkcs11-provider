@@ -157,7 +157,7 @@ jobs:
           export PKCS11_PROVIDER_DEBUG=file:$P_HTTPD_DEBUG
 
           # Start the server.
-          systemctl restart httpd 
+          service httpd restart
           if [ $? -ne 0 ]; then
             cat /var/log/httpd/error_log
             cat /var/log/httpd/ssl_error_log
