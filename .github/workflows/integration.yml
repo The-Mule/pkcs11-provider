@@ -13,7 +13,7 @@ env:
     PIN: 123456
 
 jobs:
-  build:
+  libssh:
     name: libssh
     runs-on: ubuntu-22.04
     container: fedora:latest
@@ -60,7 +60,7 @@ jobs:
           test -e $P_LIBSSH_DEBUG && \
             echo "Provider log $P_LIBSSH_DEBUG exists (expected)"
 
-  build:
+  httpd:
     name: httpd
     runs-on: ubuntu-22.04
     container: fedora:latest
