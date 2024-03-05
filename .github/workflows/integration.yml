@@ -69,10 +69,10 @@ jobs:
         run: |
           dnf -y install p11-kit httpd mod_ssl openssl softhsm \
           gnutls-utils gcc g++ git cmake libcmocka libcmocka-devel \
-	      autoconf automake autoconf-archive libtool softhsm nss-tools \
-	      gnutls-utils p11-kit p11-kit-devel p11-kit-server opensc \
-	      softhsm-devel socket_wrapper nss_wrapper uid_wrapper \
-	      pam_wrapper priv_wrapper openssh-server zlib-devel
+          autoconf automake autoconf-archive libtool softhsm nss-tools \
+          gnutls-utils p11-kit p11-kit-devel p11-kit-server opensc \
+          softhsm-devel socket_wrapper nss_wrapper uid_wrapper \
+          pam_wrapper priv_wrapper openssh-server zlib-devel
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: Setup, Build and Install pkcs11-provider
