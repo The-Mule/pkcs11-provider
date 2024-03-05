@@ -8,9 +8,9 @@ on:
     branches: ["main"]
 
 env:
-    P_LIBSSH_DEBUG: /tmp/libssh-provider-debug.log
-    P_HTTPD_DEBUG: /tmp/httpd-provider-debug.log
-    PIN: 123456
+  P_LIBSSH_DEBUG: /tmp/libssh-provider-debug.log
+  P_HTTPD_DEBUG: /tmp/httpd-provider-debug.log
+  PIN: 123456
 
 jobs:
   libssh:
@@ -107,8 +107,8 @@ jobs:
             --login --set-pin $PIN $TOKENURL
 
           # Output of tokens and their certificates and keys (for debugging).
-          p11tool --list-tokens 
-          p11tool --login --set-pin $PIN --list-keys $TOKENURL 
+          p11tool --list-tokens
+          p11tool --login --set-pin $PIN --list-keys $TOKENURL
           p11tool --list-all-certs $TOKENURL
       - name: Configure openssl
         run: |
@@ -118,14 +118,14 @@ jobs:
             -e 's|\(\[default_sect\]\)|\[pkcs11_sect\]\n\1|' \
             -e 's|\(\[default_sect\]\)|module = /usr/lib64/ossl-modules/pkcs11.so\n\1|' \
             -e 's|\(\[default_sect\]\)|pkcs11-module-path = /usr/lib64/pkcs11/libsofthsm2.so\n\1|' \
-            -e 's|\(\[default_sect\]\)|#pkcs11-module-token-pin = file:/tmp/pin.txt\n\1|' \
+            -e 's|\(\[default_sect\]\)|#pkcs11-module-token-pin = file:/tmp/pin.txt\n\1|' \
             -e 's|\(\[default_sect\]\)|#pkcs11-module-load-behavior = early\n\1|' \
             -e 's|\(\[default_sect\]\)|activate = 1\n\n\1|' \
             /etc/pki/tls/openssl.cnf >/tmp/openssl.cnf
 
           # Print openssl.cnf (for debugging).
           cat /tmp/openssl.cnf
-    
+
       - name: Configure httpd
         run: |
           set -x
@@ -152,7 +152,7 @@ jobs:
           echo "KEYURL=$KEYURL"
           echo "CERTURL=$CERTURL"
           cat /etc/httpd/conf.d/ssl.conf
-          
+
           OPENSSL_CONF=/tmp/openssl.cnf openssl pkey -in "$KEYURL" -pubin -pubout -text
 
       - name: Test httpd
@@ -165,12 +165,12 @@ jobs:
           echo "123456" >/tmp/pin.txt
           OPENSSL_CONF=/tmp/openssl.cnf httpd -DFOREGROUND &
           rpm -q httpd
-          sleep 3 
+          sleep 3
           if ! pgrep httpd >/dev/null; then
             cat /var/log/httpd/error_log
             cat /var/log/httpd/ssl_error_log
             cat $P_HTTPD_DEBUG
-          else 
+          else
             # Query the server.
             curl -v -sS --cacert ca/cert.pem https://localhost
             if [ $? -ne 0 ]; then
