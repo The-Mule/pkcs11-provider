@@ -160,6 +160,7 @@ jobs:
           export PKCS11_PROVIDER_DEBUG=file:$P_HTTPD_DEBUG
 
           # Start the server.
+          echo "123456" >/tmp/pin.txt
           OPENSSL_CONF=/tmp/openssl.cnf httpd -DFOREGROUND &
           rpm -q httpd
           sleep 3 
