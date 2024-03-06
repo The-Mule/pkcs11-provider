@@ -93,11 +93,13 @@ function httpd_setup() {
     CERTURL=$(runuser -u apache -- \
         p11tool --list-all-certs $TOKENURL | grep "URL:.*object=httpd;type=cert" | awk '{ print $NF }')
     sed -i "s/^ServerName.*\$/ServerName localhost:80/" /etc/httpd/conf/httpd.conf
+    grep ServerName /etc/httpd/conf/httpd.conf
     sed -i -e "/SSLCryptoDevice/d" \
            -e "s/^SSLCertificateFile.*\$/SSLCertificateFile \"$CERTURL\"/" \
            -e "s/^SSLCertificateKeyFile.*\$/SSLCertificateKeyFile \"$KEYURL\"/" \
            /etc/httpd/conf.d/ssl.conf
 
+    apachectl configtest
     if [ -z "$XDG_RUNTIME_DIR" ]; then
         export XDG_RUNTIME_DIR=$PWD
     fi
