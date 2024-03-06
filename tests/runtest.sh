@@ -72,7 +72,7 @@ function openssl_setup() {
            -e 's|\(\[default_sect\]\)|\[pkcs11_sect\]\n\1|' \
            -e 's|\(\[default_sect\]\)|module = /usr/lib64/ossl-modules/pkcs11.so\n\1|' \
            -e 's|\(\[default_sect\]\)|#pkcs11-module-path = /usr/lib64/pkcs11/libsofthsm2.so\n\1|' \
-           -e 's|\(\[default_sect\]\)|#pkcs11-module-load-behavior = early\n\1|' \
+           -e 's|\(\[default_sect\]\)|pkcs11-module-load-behavior = early\n\1|' \
            -e 's|\(\[default_sect\]\)|pkcs11-module-token-pin = file:/tmp/pin.txt\n\1|' \
            -e 's|\(\[default_sect\]\)|activate = 1\n\n\1|' \
         /etc/pki/tls/openssl.cnf >/tmp/openssl.cnf
