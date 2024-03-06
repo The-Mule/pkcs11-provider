@@ -84,4 +84,5 @@ jobs:
           make install
       - name: Test
         run: |
-          bash tests/runtest.sh
+          cp tests/runtest.sh /tmp/
+          bash /tmp/runtest.sh

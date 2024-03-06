@@ -7,6 +7,10 @@ PIN="123456"
 PKCS11_DEBUG_FILE="/tmp/pkcs11.log"
 
 function install_dependencies() {
+    if [ "$GITHUB_ACTIONS" == "true" ]; then
+        echo "Skipped"
+        return
+    fi
 	dnf install -y --releasever=40 --skip-broken \
         p11-kit httpd mod_ssl openssl softhsm gnutls-utils \
 	    gcc g++ git cmake libcmocka libcmocka-devel \
@@ -135,7 +139,7 @@ function httpd_test() {
 }
 
 # Setup.
-#install_dependencies
+install_dependencies
 softhsm_token_setup
 pkcs11_provider_setup
 openssl_setup
