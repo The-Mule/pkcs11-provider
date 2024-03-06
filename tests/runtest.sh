@@ -125,6 +125,7 @@ function httpd_test() {
     ip a
 
     OPENSSL_CONF=/tmp/openssl.cnf openssl pkey -in "$TOKENURL" -pubin -pubout -text 
+    rpm -qa  | grep pkcs
     echo >$PKCS11_DEBUG_FILE
     OPENSSL_CONF=/tmp/openssl.cnf httpd -DFOREGROUND &
     sleep 3
