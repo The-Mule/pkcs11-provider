@@ -44,17 +44,17 @@ function softhsm_token_setup() {
 }
 
 function pkcs11_provider_setup() {
-#    if [ -z "$PKCS11_PROVIDER_DIR" ]; then
-#        git clone https://github.com/latchset/pkcs11-provider.git
-#        PKCS11_PROVIDER_DIR="pkcs11-provider"
-#    fi
-#    pushd $PKCS11_PROVIDER_DIR
-#    autoreconf -fiv
-#    ./configure --libdir=/usr/lib64
-#    make
-#    make install
-#    popd
-
+    if [ "$GITHUB_ACTIONS" == "true" ]; then
+        echo "Skipped"
+    else
+        git clone https://github.com/latchset/pkcs11-provider.git
+        pushd pkcs11-provider
+        autoreconf -fiv
+        ./configure --libdir=/usr/lib64
+        make
+        make install
+        popd
+    fi
     if [ -e $PKCS11_DEBUG_FILE ]; then
         rm -f $PKCS11_DEBUG_FILE
     fi
@@ -67,8 +67,8 @@ function openssl_setup() {
     sed    -e 's|\(default = default_sect\)|\1\npkcs11 = pkcs11_sect\n|' \
            -e 's|\(\[default_sect\]\)|\[pkcs11_sect\]\n\1|' \
            -e 's|\(\[default_sect\]\)|module = /usr/lib64/ossl-modules/pkcs11.so\n\1|' \
-           -e 's|\(\[default_sect\]\)|pkcs11-module-path = /usr/lib64/pkcs11/libsofthsm2.so\n\1|' \
-           -e 's|\(\[default_sect\]\)|pkcs11-module-load-behavior = early\n\1|' \
+           -e 's|\(\[default_sect\]\)|#pkcs11-module-path = /usr/lib64/pkcs11/libsofthsm2.so\n\1|' \
+           -e 's|\(\[default_sect\]\)|#pkcs11-module-load-behavior = early\n\1|' \
            -e 's|\(\[default_sect\]\)|pkcs11-module-token-pin = file:/tmp/pin.txt\n\1|' \
            -e 's|\(\[default_sect\]\)|activate = 1\n\n\1|' \
         /etc/pki/tls/openssl.cnf >/tmp/openssl.cnf
@@ -93,17 +93,23 @@ function httpd_setup() {
            -e "s/^SSLCertificateKeyFile.*\$/SSLCertificateKeyFile \"$KEYURL\"/" \
            /etc/httpd/conf.d/ssl.conf
 
+    eval $(p11-kit server --provider /usr/lib64/pkcs11/libsofthsm2.so "$TOKENURL")
+    export PKCS11_PROVIDER_MODULE=/usr/lib64/pkcs11/p11-kit-client.so
+    #export PKCS11_PROVIDER_MODULE=/usr/lib64/pkcs11/libsofthsm2.so
+    sleep 3
     # List URLs and mod_ssl configuration (for debugging).
     echo "TOKENURL=$TOKENURL"
     echo "KEYURL=$KEYURL"
     echo "CERTURL=$CERTURL"
     cat /etc/httpd/conf.d/ssl.conf
+
 }
 
 function httpd_test() {
     
     # Start the server.
     echo "$PIN" >/tmp/pin.txt
+    OPENSSL_CONF=/tmp/openssl.cnf openssl pkey -in "$TOKENURL" -pubin -pubout -text 
     OPENSSL_CONF=/tmp/openssl.cnf httpd -DFOREGROUND &
     sleep 3
     if ! pgrep httpd; then
@@ -114,21 +120,22 @@ function httpd_test() {
     fi 
 
     # Query the server.
+    #PS1="TEST> " bash
     sleep 10 && curl -v -sS --cacert ca/cert.pem https://localhost
+
     if [ $? -ne 0 ]; then
         cat /var/log/httpd/error_log
         cat /var/log/httpd/ssl_error_log
         cat $PKCS11_DEBUG_FILE
         return
     fi
-    # PS1="TEST> " bash
 
     cat $PKCS11_DEBUG_FILE
     echo "Test passed."
 }
 
 # Setup.
-# install_dependencies
+#install_dependencies
 softhsm_token_setup
 pkcs11_provider_setup
 openssl_setup
