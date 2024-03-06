@@ -92,6 +92,7 @@ function httpd_setup() {
         | awk '{ print $NF }')?pin-value=$PIN"
     CERTURL=$(runuser -u apache -- \
         p11tool --list-all-certs $TOKENURL | grep "URL:.*object=httpd;type=cert" | awk '{ print $NF }')
+    sed -i "s/^ServerName.*\$/ServerName localhost:80/" /etc/httpd/conf/httpd.conf
     sed -i -e "/SSLCryptoDevice/d" \
            -e "s/^SSLCertificateFile.*\$/SSLCertificateFile \"$CERTURL\"/" \
            -e "s/^SSLCertificateKeyFile.*\$/SSLCertificateKeyFile \"$KEYURL\"/" \
@@ -117,6 +118,9 @@ function httpd_test() {
     
     # Start the server.
     echo "$PIN" >/tmp/pin.txt
+    cat /etc/hosts
+    ip a
+
     OPENSSL_CONF=/tmp/openssl.cnf openssl pkey -in "$TOKENURL" -pubin -pubout -text 
     OPENSSL_CONF=/tmp/openssl.cnf httpd -DFOREGROUND &
     sleep 3
