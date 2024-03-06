@@ -13,10 +13,10 @@ env:
   PIN: 123456
 
 jobs:
-  libssh:
+  build:
     name: libssh
     runs-on: ubuntu-22.04
-    container: docker.io/dokken/fedora-40
+    container: fedora:latest
     steps:
       - name: Install Dependencies
         run: |
