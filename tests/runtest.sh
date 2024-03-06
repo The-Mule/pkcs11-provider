@@ -78,7 +78,7 @@ function openssl_setup() {
         /etc/pki/tls/openssl.cnf >/tmp/openssl.cnf
 
     # Print openssl.cnf (for debugging).
-    cat /etc/pki/tls/openssl.cnf
+    cat /tmp/openssl.cnf
 }
 
 function httpd_setup() {
@@ -96,6 +96,10 @@ function httpd_setup() {
            -e "s/^SSLCertificateFile.*\$/SSLCertificateFile \"$CERTURL\"/" \
            -e "s/^SSLCertificateKeyFile.*\$/SSLCertificateKeyFile \"$KEYURL\"/" \
            /etc/httpd/conf.d/ssl.conf
+
+    if [ -z "$XDG_RUNTIME_DIR" ]; then
+        export XDG_RUNTIME_DIR=$PWD
+    fi
 
     eval $(p11-kit server --provider /usr/lib64/pkcs11/libsofthsm2.so "$TOKENURL")
     export PKCS11_PROVIDER_MODULE=/usr/lib64/pkcs11/p11-kit-client.so
