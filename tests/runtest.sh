@@ -71,8 +71,8 @@ function openssl_setup() {
     sed    -e 's|\(default = default_sect\)|\1\npkcs11 = pkcs11_sect\n|' \
            -e 's|\(\[default_sect\]\)|\[pkcs11_sect\]\n\1|' \
            -e 's|\(\[default_sect\]\)|module = /usr/lib64/ossl-modules/pkcs11.so\n\1|' \
-           -e 's|\(\[default_sect\]\)|#pkcs11-module-path = /usr/lib64/pkcs11/libsofthsm2.so\n\1|' \
-           -e 's|\(\[default_sect\]\)|pkcs11-module-load-behavior = early\n\1|' \
+           -e 's|\(\[default_sect\]\)|pkcs11-module-path = /usr/lib64/pkcs11/libsofthsm2.so\n\1|' \
+           -e 's|\(\[default_sect\]\)|#pkcs11-module-load-behavior = early\n\1|' \
            -e 's|\(\[default_sect\]\)|pkcs11-module-token-pin = file:/tmp/pin.txt\n\1|' \
            -e 's|\(\[default_sect\]\)|activate = 1\n\n\1|' \
         /etc/pki/tls/openssl.cnf >/tmp/openssl.cnf
@@ -105,8 +105,8 @@ function httpd_setup() {
         export XDG_RUNTIME_DIR=$PWD
     fi
 
-    eval $(p11-kit server --provider /usr/lib64/pkcs11/libsofthsm2.so "$TOKENURL")
-    export PKCS11_PROVIDER_MODULE=/usr/lib64/pkcs11/p11-kit-client.so
+    #eval $(p11-kit server --provider /usr/lib64/pkcs11/libsofthsm2.so "$TOKENURL")
+    #export PKCS11_PROVIDER_MODULE=/usr/lib64/pkcs11/p11-kit-client.so
     #export PKCS11_PROVIDER_MODULE=/usr/lib64/pkcs11/libsofthsm2.so
     sleep 3
     # List URLs and mod_ssl configuration (for debugging).
@@ -125,6 +125,7 @@ function httpd_test() {
     ip a
 
     OPENSSL_CONF=/tmp/openssl.cnf openssl pkey -in "$TOKENURL" -pubin -pubout -text 
+    echo >$PKCS11_DEBUG_FILE
     OPENSSL_CONF=/tmp/openssl.cnf httpd -DFOREGROUND &
     sleep 3
     if ! pgrep httpd; then
