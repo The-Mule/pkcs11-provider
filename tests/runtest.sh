@@ -92,7 +92,7 @@ function httpd_setup() {
         | awk '{ print $NF }')?pin-value=$PIN"
     CERTURL=$(runuser -u apache -- \
         p11tool --list-all-certs $TOKENURL | grep "URL:.*object=httpd;type=cert" | awk '{ print $NF }')
-    sed -i "s/^ServerName.*\$/ServerName localhost:80/" /etc/httpd/conf/httpd.conf
+    echo 'ServerName localhost:80' >/etc/httpd/conf/httpd.conf
     grep ServerName /etc/httpd/conf/httpd.conf
     sed -i -e "/SSLCryptoDevice/d" \
            -e "s/^SSLCertificateFile.*\$/SSLCertificateFile \"$CERTURL\"/" \
