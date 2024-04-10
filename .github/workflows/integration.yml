@@ -15,7 +15,7 @@ jobs:
       matrix:
         test: [libssh, httpd, bind]
     name: ${{ matrix.test }}
-    container: fedora:latest
+    container: fedora:rawhide
     env:
       PKCS11_MODULE: /usr/lib64/ossl-modules/pkcs11.so
     steps:
