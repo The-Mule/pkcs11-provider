@@ -57,13 +57,13 @@ token_setup()
     openssl req -x509 -sha256 -newkey rsa:2048 -noenc -batch -keyout "${TMPPDIR}/ca/key.pem" -out "${TMPPDIR}/ca/cert.pem"
     openssl req -newkey rsa:2048 -subj '/CN=localhost' -noenc -batch -keyout "${TMPPDIR}/server/key.pem" -out "${TMPPDIR}/server/csr.pem"
     openssl x509 -req -CA "${TMPPDIR}/ca/cert.pem" -CAkey "${TMPPDIR}/ca/key.pem" -in "${TMPPDIR}/server/csr.pem" -out "${TMPPDIR}/server/cert.pem" -CAcreateserial
-    chown -R apache:apache "${TMPPDIR}"
 
     usermod -a -G ods apache
 
     pkcs11-tool "${ARGS[@]}" --write-object "${TMPPDIR}/server/key.pem" --type=privkey --id "0001"
     pkcs11-tool "${ARGS[@]}" --write-object "${TMPPDIR}/server/cert.pem" --type=cert --id "0001"
-
+    chown -R apache:apache "${TMPPDIR}"
+    chmod 1770 ${TMPPDIR}/tokens/
     title SECTION "List token content"
     pkcs11-tool "${ARGS[@]}" -O
     title ENDSECTION
