@@ -91,7 +91,7 @@ httpd_test()
     title PARA "Httpd test"
 
     usermod -a -G ods apache
-    chown -R apache:apache "${TMPPDIR}"
+    # chown -R apache:apache "${TMPPDIR}"
     chmod 1770 "${TMPPDIR}"/tokens/
     (
         export OPENSSL_CONF=${TMPPDIR}/openssl.cnf 
