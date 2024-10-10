@@ -144,15 +144,15 @@ cleanup()
 {
     title PARA "Clean-up"
 
-    if [ "$TEST_RESULT" -ne 0 ]; then
-        for L in "${TMPPDIR}/openssl.cnf" "$PKCS11_DEBUG_FILE" "$MOD_SSL_CONF" "/var/log/httpd/ssl_error_log"; do
-            if [ -e "$L" ]; then
-                title SECTION "$L"
-                cat "$L"
-                title ENDSECTION
-            fi
-        done
-    fi
+#    if [ "$TEST_RESULT" -ne 0 ]; then
+#        for L in "${TMPPDIR}/openssl.cnf" "$PKCS11_DEBUG_FILE" "$MOD_SSL_CONF" "/var/log/httpd/ssl_error_log"; do
+#            if [ -e "$L" ]; then
+#                title SECTION "$L"
+#                cat "$L"
+#                title ENDSECTION
+#            fi
+#        done
+#    fi
 
     if pgrep httpd >/dev/null; then
         pkill httpd
