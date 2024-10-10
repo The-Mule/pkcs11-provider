@@ -99,7 +99,7 @@ openssl_setup()
         -e "s|\(\[default_sect\]\)|module = $PKCS11_MODULE\n\1|" \
         -e "s|\(\[default_sect\]\)|pkcs11-module-load-behavior = early\n\1|" \
         -e "s|\(\[default_sect\]\)|activate = 1\n\1|" \
-        -e "s|\(\[default_sect\]\)|pkcs11-module-token-pin = file:$PINFILE.1\n\n\1|" \
+        -e "s|\(\[default_sect\]\)|pkcs11-module-token-pin = file:$PINFILE\n\n\1|" \
         /etc/pki/tls/openssl.cnf >"${TMPPDIR}"/openssl.cnf
 }
 
