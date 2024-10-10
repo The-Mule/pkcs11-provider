@@ -54,7 +54,7 @@ token_setup()
     openssl req -newkey rsa:2048 -subj '/CN=localhost' -noenc -batch -keyout "${TMPPDIR}/server/key.pem" -out "${TMPPDIR}/server/csr.pem"
     openssl x509 -req -CA "${TMPPDIR}/ca/cert.pem" -CAkey "${TMPPDIR}/ca/key.pem" -in "${TMPPDIR}/server/csr.pem" -out "${TMPPDIR}/server/cert.pem" -CAcreateserial
 
-    pkcs11-tool "${ARGS[@]}" --write-object "${TMPPDIR}/server/key.pem" --type=privkey --id "01"
+    pkcs11-tool "${ARGS[@]}" --write-object "${TMPPDIR}/server/key.pem" --type=privkey --id "01" --usage-sign --usage-decrypt --usage-derive --usage-wrap 
     pkcs11-tool "${ARGS[@]}" --write-object "${TMPPDIR}/server/cert.pem" --type=cert --id "01"
     
     title SECTION "List token content"
@@ -91,8 +91,7 @@ httpd_test()
     title PARA "Httpd test"
 
     usermod -a -G ods apache
-    chown -R apache:apache "${TMPPDIR}/tokens"
-    chmod 1770 "${TMPPDIR}/tokens"
+    chmod 1777 "${TMPPDIR}/tokens" -R
     (
         export OPENSSL_CONF=${TMPPDIR}/openssl.cnf 
         export PKCS11_PROVIDER_DEBUG=file:${PKCS11_DEBUG_FILE}
