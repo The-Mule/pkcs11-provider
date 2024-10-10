@@ -35,6 +35,10 @@ token_setup()
     if [ "${TOKENTYPE}" == "softhsm" ]; then
         # shellcheck disable=SC1091
         source "../softhsm-init.sh"
+        export XDG_RUNTIME_DIR=$PWD
+        eval "$(p11-kit server --provider "$P11LIB" "pkcs11:")"
+        test -n "$P11_KIT_SERVER_PID"
+        export P11LIB="/usr/lib64/pkcs11/p11-kit-client.so"
     elif [ "${TOKENTYPE}" == "softokn" ]; then
         # shellcheck disable=SC1091
         SHARED_EXT=".so" SOFTOKNPATH="/usr/lib64" source "../softokn-init.sh"
@@ -93,7 +97,7 @@ openssl_setup()
         -e "s|\(default = default_sect\)|\1\npkcs11 = pkcs11_sect\n|" \
         -e "s|\(\[default_sect\]\)|\[pkcs11_sect\]\n$TOKENOPTIONS\n\1|" \
         -e "s|\(\[default_sect\]\)|module = $PKCS11_MODULE\n\1|" \
-        -e "s|\(\[default_sect\]\)|#pkcs11-module-load-behavior = early\n\1|" \
+        -e "s|\(\[default_sect\]\)|pkcs11-module-load-behavior = early\n\1|" \
         -e "s|\(\[default_sect\]\)|activate = 1\n\1|" \
         -e "s|\(\[default_sect\]\)|pkcs11-module-token-pin = file:$PINFILE\n\n\1|" \
         /etc/pki/tls/openssl.cnf >"${TMPPDIR}"/openssl.cnf
@@ -156,6 +160,10 @@ cleanup()
 
     if [ -e "${MOD_SSL_CONF}".bck ]; then
         mv "${MOD_SSL_CONF}".bck "$MOD_SSL_CONF"
+    fi
+
+    if [ "${TOKENTYPE}" == "softhsm" ]; then
+        cleanup_server "p11-kit" "$P11_KIT_SERVER_PID"
     fi
 }
 
