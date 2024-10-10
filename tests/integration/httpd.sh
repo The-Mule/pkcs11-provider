@@ -81,8 +81,8 @@ httpd_setup()
 
     cp -p $MOD_SSL_CONF{,.bck}
     sed -i -e "/^SSLCryptoDevice/d" \
-           -e "s/^SSLCertificateFile.*\$/SSLCertificateFile \"pkcs11:type=cert;id=%00%01\"/" \
-           -e "s/^SSLCertificateKeyFile.*\$/SSLCertificateKeyFile \"pkcs11:type=private;id=%00%01\"/" \
+           -e "s/^SSLCertificateFile.*\$/SSLCertificateFile \"pkcs11:type=cert;id=%01\"/" \
+           -e "s/^SSLCertificateKeyFile.*\$/SSLCertificateKeyFile \"pkcs11:type=private;id=%01\"/" \
            $MOD_SSL_CONF
 }
 
