@@ -95,7 +95,7 @@ openssl_setup()
 
     sed \
         -e "s|\(default = default_sect\)|\1\npkcs11 = pkcs11_sect\n|" \
-        -e "s|\(\[default_sect\]\)|\[pkcs11_sect\]\n$TOKENOPTIONS\n\1|" \
+        -e "s|\(\[default_sect\]\)|\[pkcs11_sect\]\n#$TOKENOPTIONS\n\1|" \
         -e "s|\(\[default_sect\]\)|module = $PKCS11_MODULE\n\1|" \
         -e "s|\(\[default_sect\]\)|pkcs11-module-load-behavior = early\n\1|" \
         -e "s|\(\[default_sect\]\)|activate = 1\n\1|" \
