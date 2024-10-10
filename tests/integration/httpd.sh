@@ -24,7 +24,7 @@ mkdir "${TOKDIR}"
 PINVALUE="123456"
 PINFILE="${TMPPDIR}/pinfile.txt"
 echo ${PINVALUE} > "${PINFILE}"
-PKCS11_DEBUG_FILE="${TMPPDIR}/pkcs11-httpd-test.log"
+PKCS11_DEBUG_FILE="${TMPPDIR}/pkcs11-test.log"
 TEST_RESULT=1
 MOD_SSL_CONF="/etc/httpd/conf.d/ssl.conf"
 
@@ -106,7 +106,7 @@ httpd_setup()
     cp -p $MOD_SSL_CONF{,.bck}
     sed -i -e "/^SSLCryptoDevice/d" \
            -e "s/^SSLCertificateFile.*\$/SSLCertificateFile \"pkcs11:type=cert;id=%00%02\"/" \
-           -e "s/^SSLCertificateKeyFile.*\$/SSLCertificateKeyFile \"pkcs11:type=private;id=%00%01?pin-value=${PINVALUE}\"/" \
+           -e "s/^SSLCertificateKeyFile.*\$/SSLCertificateKeyFile \"pkcs11:type=private;id=%00%01\"/" \
            $MOD_SSL_CONF
 }
 
@@ -123,6 +123,7 @@ httpd_test()
         sleep 3
         if ! pgrep httpd >/dev/null; then
             echo "ERROR: Unable to start httpd!"
+            PS1="> " bash
             exit 1
         fi
         title ENDSECTION
