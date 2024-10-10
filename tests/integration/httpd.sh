@@ -35,9 +35,9 @@ token_setup()
     if [ "${TOKENTYPE}" == "softhsm" ]; then
         # shellcheck disable=SC1091
         source "../softhsm-init.sh"
-        export XDG_RUNTIME_DIR=$PWD
+        #export XDG_RUNTIME_DIR=$PWD
         #eval "$(p11-kit server --provider "$P11LIB" "pkcs11:")"
-        test -n "$P11_KIT_SERVER_PID"
+        #test -n "$P11_KIT_SERVER_PID"
         #export P11LIB="/usr/lib64/pkcs11/p11-kit-client.so"
     elif [ "${TOKENTYPE}" == "softokn" ]; then
         # shellcheck disable=SC1091
