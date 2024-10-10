@@ -18,7 +18,7 @@ TOKDIR="$TMPPDIR/tokens"
 if [ -d "${TMPPDIR}" ]; then
     rm -fr "${TMPPDIR}"
 fi
-mkdir "${TMPPDIR}"
+mkdir -p "${TMPPDIR}"
 mkdir "${TOKDIR}"
 
 PINVALUE="123456"
