@@ -115,7 +115,7 @@ httpd_test()
     title PARA "Httpd test"
 
     (
-        export OPENSSL_CONF=${WORKDIR}/openssl.cnf 
+        export OPENSSL_CONF=${TMPPDIR}/openssl.cnf 
         export PKCS11_PROVIDER_DEBUG=file:${PKCS11_DEBUG_FILE}
         
         title SECTION "Test 1: Start httpd"
