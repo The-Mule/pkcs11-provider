@@ -62,7 +62,7 @@ token_setup()
     usermod -a -G ods apache
 
     pkcs11-tool "${ARGS[@]}" --write-object "${TMPPDIR}/server/key.pem" --type=privkey --id "0001"
-    pkcs11-tool "${ARGS[@]}" --write-object "${TMPPDIR}/server/cert.pem" --type=cert --id "0002"
+    pkcs11-tool "${ARGS[@]}" --write-object "${TMPPDIR}/server/cert.pem" --type=cert --id "0001"
 
     title SECTION "List token content"
     pkcs11-tool "${ARGS[@]}" -O
@@ -109,7 +109,7 @@ httpd_setup()
 
     cp -p $MOD_SSL_CONF{,.bck}
     sed -i -e "/^SSLCryptoDevice/d" \
-           -e "s/^SSLCertificateFile.*\$/SSLCertificateFile \"pkcs11:type=cert;id=%00%02\"/" \
+           -e "s/^SSLCertificateFile.*\$/SSLCertificateFile \"pkcs11:type=cert;id=%00%01\"/" \
            -e "s/^SSLCertificateKeyFile.*\$/SSLCertificateKeyFile \"pkcs11:type=private;id=%00%01\"/" \
            $MOD_SSL_CONF
 }
