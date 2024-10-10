@@ -35,10 +35,6 @@ token_setup()
     if [ "${TOKENTYPE}" == "softhsm" ]; then
         # shellcheck disable=SC1091
         source "../softhsm-init.sh"
-        #export XDG_RUNTIME_DIR=$PWD
-        #eval "$(p11-kit server --provider "$P11LIB" "pkcs11:")"
-        #test -n "$P11_KIT_SERVER_PID"
-        #export P11LIB="/usr/lib64/pkcs11/p11-kit-client.so"
     elif [ "${TOKENTYPE}" == "softokn" ]; then
         # shellcheck disable=SC1091
         SHARED_EXT=".so" SOFTOKNPATH="/usr/lib64" source "../softokn-init.sh"
@@ -58,35 +54,12 @@ token_setup()
     openssl req -newkey rsa:2048 -subj '/CN=localhost' -noenc -batch -keyout "${TMPPDIR}/server/key.pem" -out "${TMPPDIR}/server/csr.pem"
     openssl x509 -req -CA "${TMPPDIR}/ca/cert.pem" -CAkey "${TMPPDIR}/ca/key.pem" -in "${TMPPDIR}/server/csr.pem" -out "${TMPPDIR}/server/cert.pem" -CAcreateserial
 
-    usermod -a -G ods apache
-
-    pkcs11-tool "${ARGS[@]}" --write-object "${TMPPDIR}/server/key.pem" --type=privkey --id "0001"
-    pkcs11-tool "${ARGS[@]}" --write-object "${TMPPDIR}/server/cert.pem" --type=cert --id "0001"
-    chown -R apache:apache "${TMPPDIR}"
-    chmod 1770 ${TMPPDIR}/tokens/
+    pkcs11-tool "${ARGS[@]}" --write-object "${TMPPDIR}/server/key.pem" --type=privkey --id "01"
+    pkcs11-tool "${ARGS[@]}" --write-object "${TMPPDIR}/server/cert.pem" --type=cert --id "01"
+    
     title SECTION "List token content"
     pkcs11-tool "${ARGS[@]}" -O
     title ENDSECTION
-}
-
-pkcs11_provider_setup()
-{
-    title PARA "Get, compile and install pkcs11-provider"
-
-    if [ -z "$PKCS11_MODULE" ]; then
-        git clone \
-            "${GIT_URL:-"https://github.com/latchset/pkcs11-provider.git"}" \
-            "${TMPPDIR}"/pkcs11-provider
-        pushd "${TMPPDIR}"/pkcs11-provider
-        git checkout "${GIT_REF:-"main"}"
-        meson setup -Dlibdir=/usr/lib64 builddir
-        meson compile -C builddir
-        meson install -C builddir
-        popd
-        export PKCS11_MODULE=/usr/lib64/ossl-modules/pkcs11.so
-    else
-        title LINE "Skipped"
-    fi
 }
 
 openssl_setup()
@@ -95,9 +68,8 @@ openssl_setup()
 
     sed \
         -e "s|\(default = default_sect\)|\1\npkcs11 = pkcs11_sect\n|" \
-        -e "s|\(\[default_sect\]\)|\[pkcs11_sect\]\n#$TOKENOPTIONS\n\1|" \
+        -e "s|\(\[default_sect\]\)|\[pkcs11_sect\]\n$TOKENOPTIONS\n\1|" \
         -e "s|\(\[default_sect\]\)|module = $PKCS11_MODULE\n\1|" \
-        -e "s|\(\[default_sect\]\)|pkcs11-module-load-behavior = early\n\1|" \
         -e "s|\(\[default_sect\]\)|activate = 1\n\1|" \
         -e "s|\(\[default_sect\]\)|pkcs11-module-token-pin = file:$PINFILE\n\n\1|" \
         /etc/pki/tls/openssl.cnf >"${TMPPDIR}"/openssl.cnf
@@ -118,6 +90,9 @@ httpd_test()
 {
     title PARA "Httpd test"
 
+    usermod -a -G ods apache
+    chown -R apache:apache "${TMPPDIR}"
+    chmod 1770 "${TMPPDIR}"/tokens/
     (
         export OPENSSL_CONF=${TMPPDIR}/openssl.cnf 
         export PKCS11_PROVIDER_DEBUG=file:${PKCS11_DEBUG_FILE}
@@ -144,15 +119,15 @@ cleanup()
 {
     title PARA "Clean-up"
 
-#    if [ "$TEST_RESULT" -ne 0 ]; then
-#        for L in "${TMPPDIR}/openssl.cnf" "$PKCS11_DEBUG_FILE" "$MOD_SSL_CONF" "/var/log/httpd/ssl_error_log"; do
-#            if [ -e "$L" ]; then
-#                title SECTION "$L"
-#                cat "$L"
-#                title ENDSECTION
-#            fi
-#        done
-#    fi
+    if [ "$TEST_RESULT" -ne 0 ]; then
+        for L in "${TMPPDIR}/openssl.cnf" "$PKCS11_DEBUG_FILE" "$MOD_SSL_CONF" "/var/log/httpd/ssl_error_log"; do
+            if [ -e "$L" ]; then
+                title SECTION "$L"
+                cat "$L"
+                title ENDSECTION
+            fi
+        done
+    fi
 
     if pgrep httpd >/dev/null; then
         pkill httpd
@@ -160,10 +135,6 @@ cleanup()
 
     if [ -e "${MOD_SSL_CONF}".bck ]; then
         mv "${MOD_SSL_CONF}".bck "$MOD_SSL_CONF"
-    fi
-
-    if [ "${TOKENTYPE}" == "softhsm" ]; then
-        cleanup_server "p11-kit" "$P11_KIT_SERVER_PID"
     fi
 }
 
