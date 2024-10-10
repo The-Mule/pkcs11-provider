@@ -93,7 +93,7 @@ openssl_setup()
         -e "s|\(default = default_sect\)|\1\npkcs11 = pkcs11_sect\n|" \
         -e "s|\(\[default_sect\]\)|\[pkcs11_sect\]\n$TOKENOPTIONS\n\1|" \
         -e "s|\(\[default_sect\]\)|module = $PKCS11_MODULE\n\1|" \
-        -e "s|\(\[default_sect\]\)|#pkcs11-module-load-behavior = early\n\1|" \
+        -e "s|\(\[default_sect\]\)|pkcs11-module-load-behavior = early\n\1|" \
         -e "s|\(\[default_sect\]\)|activate = 1\n\1|" \
         -e "s|\(\[default_sect\]\)|pkcs11-module-token-pin = file:$PINFILE\n\n\1|" \
         /etc/pki/tls/openssl.cnf >"${TMPPDIR}"/openssl.cnf
@@ -123,7 +123,6 @@ httpd_test()
         sleep 3
         if ! pgrep httpd >/dev/null; then
             echo "ERROR: Unable to start httpd!"
-            PS1="> " bash
             exit 1
         fi
         title ENDSECTION
