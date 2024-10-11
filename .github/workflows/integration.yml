@@ -24,7 +24,7 @@ jobs:
             token: softokn
           - test: bind
             token: softhsm
-    name: ${{ matrix.test }} (${{ matrix.token }})
+    name: ${{ matrix.test }} test with software token (${{ matrix.token }})
     container: fedora:rawhide
     steps:
       - name: Get Date for DNF cache entry
