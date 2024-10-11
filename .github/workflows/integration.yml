@@ -48,7 +48,7 @@ jobs:
               bind9-next softhsm 'perl(Module::Load::Conditional)' \
               'perl(File::Temp)' 'perl(IPC::Cmd)' 'perl(FindBin)' \
               'perl(lib)' 'perl(File::Compare)' 'perl(File::Copy)' \
-              procps-ng
+              procps-ng nss-tools mod_ssl
 
       - name: Checkout Repository
         uses: actions/checkout@v4
