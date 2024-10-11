@@ -61,7 +61,7 @@ jobs:
           git submodule update --init
           echo "KRYOPTIC=${PWD}" >> "$GITHUB_OUTPUT"
 
-      - if: ${{ matrix.token }} == 'kryoptic'
+      - if: ${{ matrix.token == 'kryoptic' }}
         name: OpenSSL build cache
         uses: actions/cache@v4
         id: cache
@@ -70,13 +70,13 @@ jobs:
             kryoptic/openssl/
           key: ${{ runner.os }}-ossl-${{ hashFiles('kryoptic/.git/modules/openssl/HEAD') }}
 
-      - if: ${{ matrix.token }} == 'kryoptic'
+      - if: ${{ matrix.token == 'kryoptic' }}
         name: Generate lock file
         run: |
           cd kryoptic
           cargo generate-lockfile
 
-      - if: ${{ matrix.token }} == 'kryoptic'
+      - if: ${{ matrix.token == 'kryoptic' }}
         name: Cache Rust dependencies
         uses: actions/cache@v4
         with:
@@ -88,7 +88,7 @@ jobs:
             kryoptic/target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('kryoptic/**/Cargo.lock') }}
 
-      - if: ${{ matrix.token }} == 'kryoptic'
+      - if: ${{ matrix.token == 'kryoptic' }}
         name: Build Kryoptic
         run: |
           cd kryoptic
