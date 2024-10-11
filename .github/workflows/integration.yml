@@ -14,12 +14,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - test: libssh
-            token: softhsm
-          - test: httpd
+          - test: "libssh"
+            token: "softhsm"
+          - test: "httpd"
             token: [softhsm, softokn, kryoptic]
-          - test: bind
-            token: kryoptic
+          - test: "bind"
+            token: "kryoptic"
     name: ${{ test }} (${{ token }})
     container: fedora:rawhide
     steps:
