@@ -137,6 +137,7 @@ cleanup()
     fi
 
     echo "blabla"
+    exit $TEST_RESULT
 }
 
 trap "cleanup" EXIT
@@ -148,5 +149,3 @@ httpd_setup
 
 # Test.
 httpd_test
-
-exit $TEST_RESULT
