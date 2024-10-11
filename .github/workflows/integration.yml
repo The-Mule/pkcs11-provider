@@ -47,7 +47,8 @@ jobs:
               gcc g++ perl-interpreter zlib-devel sqlite-devel httpd \
               bind9-next softhsm 'perl(Module::Load::Conditional)' \
               'perl(File::Temp)' 'perl(IPC::Cmd)' 'perl(FindBin)' \
-              'perl(lib)' 'perl(File::Compare)' 'perl(File::Copy)'
+              'perl(lib)' 'perl(File::Compare)' 'perl(File::Copy)' \
+              procps-ng
 
       - name: Checkout Repository
         uses: actions/checkout@v4
