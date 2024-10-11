@@ -135,6 +135,8 @@ cleanup()
     if [ -e "${MOD_SSL_CONF}".bck ]; then
         mv "${MOD_SSL_CONF}".bck "$MOD_SSL_CONF"
     fi
+
+    echo "blabla"
 }
 
 trap "cleanup" EXIT
