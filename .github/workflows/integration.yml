@@ -105,4 +105,4 @@ jobs:
           PKCS11_MODULE: /usr/lib64/ossl-modules/pkcs11.so
           KRYOPTIC: ${{ steps.kryoptic_setup.outputs.KRYOPTIC }}
         run: |
-          pushd tests/integration && bash -e ${{ matrix.test }}.sh %{{ matrix.token }}
+          pushd tests/integration && bash -e ${{ matrix.test }}.sh ${{ matrix.token }}
