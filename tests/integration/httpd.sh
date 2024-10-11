@@ -136,7 +136,6 @@ cleanup()
         mv "${MOD_SSL_CONF}".bck "$MOD_SSL_CONF"
     fi
 
-    echo "blabla"
     exit $TEST_RESULT
 }
 
