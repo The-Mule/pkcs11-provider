@@ -391,7 +391,8 @@ sed -e "s|@libtoollibs@|${LIBSPATH}|g" \
 title LINE "Export test variables to ${TMPPDIR}/testvars"
 cat >> "${TMPPDIR}/testvars" <<DBGSCRIPT
 ${TOKENCONFIGVARS}
-export P11LIB=${P11LIB}
+export P11LIB="${P11LIB}"
+export TOKENLABEL="${TOKENLABEL}"
 export PKCS11_PROVIDER_MODULE=${P11LIB}
 export PPDBGFILE=${TMPPDIR}/p11prov-debug.log
 export PKCS11_PROVIDER_DEBUG="file:${TMPPDIR}/p11prov-debug.log"
@@ -474,7 +475,7 @@ fi
 cat >> "${TMPPDIR}/testvars" <<DBGSCRIPT
 
 # for listing the separate pkcs11 calls
-#export PKCS11SPY="${PKCS11_PROVIDER_MODULE}"
+#export PKCS11SPY="${P11LIB}"
 #export PKCS11_PROVIDER_MODULE=/usr/lib64/pkcs11-spy.so
 DBGSCRIPT
 gen_unsetvars
