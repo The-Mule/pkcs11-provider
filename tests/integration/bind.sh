@@ -123,6 +123,8 @@ cleanup()
     if [ "${TOKENTYPE}" == "softhsm" ]; then
         cleanup_server "p11-kit" "$P11_KIT_SERVER_PID"
     fi
+
+    exit $TEST_RESULT
 }
 
 trap "cleanup" EXIT
@@ -134,5 +136,3 @@ bind_setup
 
 # Test.
 bind_test
-
-exit $TEST_RESULT
