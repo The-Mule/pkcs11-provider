@@ -574,6 +574,7 @@ CK_KEY_TYPE p11prov_obj_get_key_type(P11PROV_OBJ *obj)
         switch (obj->class) {
         case CKO_PRIVATE_KEY:
         case CKO_PUBLIC_KEY:
+        case CKO_DOMAIN_PARAMETERS:
             return obj->data.key.type;
         }
     }
@@ -638,6 +639,7 @@ CK_ULONG p11prov_obj_get_key_bit_size(P11PROV_OBJ *obj)
         switch (obj->class) {
         case CKO_PRIVATE_KEY:
         case CKO_PUBLIC_KEY:
+        case CKO_DOMAIN_PARAMETERS:
             return obj->data.key.bit_size;
         }
     }
@@ -650,6 +652,7 @@ CK_ULONG p11prov_obj_get_key_size(P11PROV_OBJ *obj)
         switch (obj->class) {
         case CKO_PRIVATE_KEY:
         case CKO_PUBLIC_KEY:
+        case CKO_DOMAIN_PARAMETERS:
             return obj->data.key.size;
         }
     }
@@ -2474,6 +2477,39 @@ CK_ATTRIBUTE *p11prov_obj_get_ec_public_raw(P11PROV_OBJ *key)
     return pub_key;
 }
 
+static int cmp_bn_attr(P11PROV_OBJ *key1, P11PROV_OBJ *key2,
+                       CK_ATTRIBUTE_TYPE attr)
+{
+    BIGNUM *bx1;
+    BIGNUM *bx2;
+    CK_ATTRIBUTE *x1, *x2;
+    int rc = RET_OSSL_ERR;
+
+    /* is BN ?*/
+    if (attr != CKA_MODULUS && attr != CKA_PUBLIC_EXPONENT) {
+        return rc;
+    }
+
+    x1 = p11prov_obj_get_attr(key1, attr);
+    x2 = p11prov_obj_get_attr(key2, attr);
+
+    if (!x1 || !x2) {
+        return rc;
+    }
+
+    bx1 = BN_native2bn(x1->pValue, x1->ulValueLen, NULL);
+    bx2 = BN_native2bn(x2->pValue, x2->ulValueLen, NULL);
+
+    if (BN_cmp(bx1, bx2) == 0) {
+        rc = RET_OSSL_OK;
+    }
+
+    BN_free(bx1);
+    BN_free(bx2);
+
+    return rc;
+}
+
 static int cmp_attr(P11PROV_OBJ *key1, P11PROV_OBJ *key2,
                     CK_ATTRIBUTE_TYPE attr)
 {
@@ -2502,11 +2538,11 @@ static int cmp_public_key_values(P11PROV_OBJ *pub_key1, P11PROV_OBJ *pub_key2)
         /* pub_key1 pub_key2 could be CKO_PRIVATE_KEY here but
          *  nevertheless contain these two attributes
          */
-        ret = cmp_attr(pub_key1, pub_key2, CKA_MODULUS);
+        ret = cmp_bn_attr(pub_key1, pub_key2, CKA_MODULUS);
         if (ret == RET_OSSL_ERR) {
             break;
         }
-        ret = cmp_attr(pub_key1, pub_key2, CKA_PUBLIC_EXPONENT);
+        ret = cmp_bn_attr(pub_key1, pub_key2, CKA_PUBLIC_EXPONENT);
         break;
     case CKK_EC:
     case CKK_EC_EDWARDS:
@@ -4277,10 +4313,13 @@ CK_RV p11prov_obj_import_key(P11PROV_OBJ *key, CK_KEY_TYPE type,
 
     switch (class) {
     case CKO_PUBLIC_KEY:
+        key->class = CKO_PUBLIC_KEY;
         return p11prov_obj_import_public_key(key, type, params);
     case CKO_PRIVATE_KEY:
+        key->class = CKO_PRIVATE_KEY;
         return p11prov_obj_import_private_key(key, type, params);
     case CKO_DOMAIN_PARAMETERS:
+        key->class = CKO_DOMAIN_PARAMETERS;
         return p11prov_obj_set_domain_params(key, type, params);
     default:
         P11PROV_raise(key->ctx, CKR_KEY_INDIGESTIBLE,
@@ -4313,15 +4352,15 @@ CK_RV p11prov_obj_set_ec_encoded_public_key(P11PROV_OBJ *key,
         return CKR_KEY_INDIGESTIBLE;
     }
 
-    if (key->class == CK_UNAVAILABLE_INFORMATION) {
-        key->class = CKO_PUBLIC_KEY;
-    }
-
     switch (key->data.key.type) {
     case CKK_EC:
     case CKK_EC_EDWARDS:
-        /* check that this is a public key */
-        if (key->class != CKO_PUBLIC_KEY) {
+        /* if class is still "domain parameters" convert it to
+         * a public key */
+        if (key->class == CKO_DOMAIN_PARAMETERS) {
+            key->class = CKO_PUBLIC_KEY;
+        } else if (key->class != CKO_PUBLIC_KEY) {
+            /* check that this is a public key */
             P11PROV_raise(key->ctx, CKR_KEY_INDIGESTIBLE,
                           "Invalid Key type, not a public key");
             return CKR_KEY_INDIGESTIBLE;
