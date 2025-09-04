@@ -79,6 +79,7 @@ jobs:
       - name: Test
         env:
           KRYOPTIC: ${{ steps.kryoptic_setup.outputs.KRYOPTIC }}
+          SUPPORT_ML_DSA: 0
         run:
           meson test --num-processes 1 -C builddir
 
