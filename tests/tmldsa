@@ -4,7 +4,8 @@
 
 source "${TESTSSRCDIR}/helpers.sh"
 
-if [[ "${SUPPORT_ML_DSA}" = "0" ]]; then
+if [[ "${SUPPORT_ML_DSA}" != "1" ]]; then
+    echo "SUPPORT_ML_DSA=|$SUPPORT_ML_DSA|"
     exit 77;
 fi
 
