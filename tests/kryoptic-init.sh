@@ -52,9 +52,5 @@ export TESTPORT="34000"
 
 export SUPPORT_ALLOWED_MECHANISMS=1
 
-echo "SUPPORT_ML_DSA=|$SUPPORT_ML_DSA|"
 # Enable SUPPORT_ML_DSA as long as it is not set already.
 test -z "$SUPPORT_ML_DSA" && export SUPPORT_ML_DSA=1
-echo "SUPPORT_ML_DSA=|$SUPPORT_ML_DSA|"
-exit 1
-
