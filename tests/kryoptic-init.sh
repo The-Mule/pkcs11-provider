@@ -51,4 +51,6 @@ export TOKENCONFIGVARS="export KRYOPTIC_CONF=$TOKDIR/kryoptic.conf"
 export TESTPORT="34000"
 
 export SUPPORT_ALLOWED_MECHANISMS=1
-export SUPPORT_ML_DSA=1
+
+# Enable SUPPORT_ML_DSA as long as it is not set already.
+test -z "$SUPPORT_ML_DSA" && export SUPPORT_ML_DSA=1
